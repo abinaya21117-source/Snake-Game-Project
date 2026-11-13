@@ -1,0 +1,119 @@
+
+body {
+    margin: 0;
+    padding: 20px;
+    background: #101820;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.container {
+    max-width: 500px;
+    margin: auto;
+    background: #1c2b36;
+    padding: 20px;
+    border-radius: 15px;
+}
+
+h1 {
+    color: #00ff88;
+}
+
+.subtitle {
+    color: #bbbbbb;
+}
+
+.score-board {
+    display: flex;
+    justify-content: space-around;
+    background: #263b48;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.score-board h3 {
+    color: #00ff88;
+}
+
+.score-board span {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.settings {
+    margin: 15px;
+}
+
+select {
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.game-area {
+    position: relative;
+    width: 400px;
+    max-width: 100%;
+    margin: auto;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #07130d;
+    border: 3px solid #00ff88;
+    border-radius: 8px;
+}
+
+#message {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.75);
+}
+
+#message h2 {
+    color: #00ff88;
+}
+
+#message p {
+    color: white;
+}
+
+.buttons {
+    margin: 20px 0;
+}
+
+button {
+    padding: 12px 18px;
+    margin: 5px;
+    background: #00cc66;
+    color: black;
+    font-weight: bold;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #00ff88;
+}
+
+.instructions {
+    color: #bbbbbb;
+    font-size: 14px;
+}
+
+@media (max-width: 450px) {
+    .container {
+        padding: 10px;
+    }
+
+    button {
+        padding: 10px;
+    }
+}

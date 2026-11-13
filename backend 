@@ -1,0 +1,265 @@
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+const box = 20;
+const total = 400;
+
+let snake;
+let food;
+let direction;
+let nextDirection;
+let score = 0;
+let level = 1;
+let speed = 120;
+let gameTimer = null;
+let gameRunning = false;
+
+let highScore = Number(localStorage.getItem("snakeHighScore")) || 0;
+
+document.getElementById("highScore").innerText = highScore;
+
+// Generate food
+function generateFood() {
+    let newFood;
+
+    do {
+        newFood = {
+            x: Math.floor(Math.random() * 20) * box,
+            y: Math.floor(Math.random() * 20) * box
+        };
+    } while (
+        snake.some(part =>
+            part.x === newFood.x &&
+            part.y === newFood.y
+        )
+    );
+
+    food = newFood;
+}
+
+// Draw game
+function drawGame() {
+    ctx.fillStyle = "#07130d";
+    ctx.fillRect(0, 0, total, total);
+
+    // Draw food
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.arc(
+        food.x + 10,
+        food.y + 10,
+        8,
+        0,
+        Math.PI * 2
+    );
+    ctx.fill();
+
+    // Draw snake
+    snake.forEach((part, index) => {
+        ctx.fillStyle = index === 0 ? "#00ff88" : "#00aa55";
+
+        ctx.fillRect(
+            part.x + 1,
+            part.y + 1,
+            box - 2,
+            box - 2
+        );
+    });
+}
+
+// Start game
+function startGame() {
+    if (gameRunning) return;
+
+    if (!snake) {
+        resetGame();
+    }
+
+    gameRunning = true;
+    document.getElementById("message").style.display = "none";
+
+    gameTimer = setInterval(moveSnake, speed);
+}
+
+// Reset game
+function resetGame() {
+    snake = [
+        { x: 200, y: 200 },
+        { x: 180, y: 200 },
+        { x: 160, y: 200 }
+    ];
+
+    direction = { x: box, y: 0 };
+    nextDirection = { x: box, y: 0 };
+
+    score = 0;
+    level = 1;
+
+    speed = Number(
+        document.getElementById("difficulty").value
+    );
+
+    document.getElementById("score").innerText = score;
+    document.getElementById("level").innerText = level;
+
+    generateFood();
+    drawGame();
+}
+
+// Move snake
+function moveSnake() {
+    direction = nextDirection;
+
+    const head = {
+        x: snake[0].x + direction.x,
+        y: snake[0].y + direction.y
+    };
+
+    const eating =
+        head.x === food.x && head.y === food.y;
+
+    // Wall collision
+    if (
+        head.x < 0 ||
+        head.x >= total ||
+        head.y < 0 ||
+        head.y >= total
+    ) {
+        gameOver();
+        return;
+    }
+
+    // Self collision
+    const bodyToCheck = eating
+        ? snake
+        : snake.slice(0, -1);
+
+    if (
+        bodyToCheck.some(part =>
+            part.x === head.x &&
+            part.y === head.y
+        )
+    ) {
+        gameOver();
+        return;
+    }
+
+    snake.unshift(head);
+
+    // Eat food
+    if (eating) {
+        score++;
+
+        document.getElementById("score").innerText = score;
+
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem("snakeHighScore", highScore);
+
+            document.getElementById("highScore").innerText =
+                highScore;
+        }
+
+        generateFood();
+        updateLevel();
+    } else {
+        snake.pop();
+    }
+
+    drawGame();
+}
+
+// Increase level and speed
+function updateLevel() {
+    const newLevel = Math.floor(score / 5) + 1;
+
+    if (newLevel !== level) {
+        level = newLevel;
+
+        document.getElementById("level").innerText = level;
+
+        speed = Math.max(45, speed - 10);
+
+        clearInterval(gameTimer);
+        gameTimer = setInterval(moveSnake, speed);
+    }
+}
+
+// Keyboard controls
+document.addEventListener("keydown", function(event) {
+    const key = event.key.toLowerCase();
+
+    const controls = {
+        arrowup: { x: 0, y: -box },
+        w: { x: 0, y: -box },
+
+        arrowdown: { x: 0, y: box },
+        s: { x: 0, y: box },
+
+        arrowleft: { x: -box, y: 0 },
+        a: { x: -box, y: 0 },
+
+        arrowright: { x: box, y: 0 },
+        d: { x: box, y: 0 }
+    };
+
+    if (controls[key]) {
+        event.preventDefault();
+
+        const newDirection = controls[key];
+
+        if (
+            newDirection.x !== -direction.x &&
+            newDirection.y !== -direction.y
+        ) {
+            nextDirection = newDirection;
+        }
+    }
+});
+
+// Pause game
+function pauseGame() {
+    if (!gameRunning) return;
+
+    clearInterval(gameTimer);
+    gameRunning = false;
+
+    showMessage("Game Paused", "Press Start to continue");
+}
+
+// Restart game
+function restartGame() {
+    clearInterval(gameTimer);
+    gameRunning = false;
+
+    resetGame();
+    startGame();
+}
+
+// Game over
+function gameOver() {
+    clearInterval(gameTimer);
+    gameRunning = false;
+
+    showMessage(
+        "Game Over!",
+        "Your Final Score: " + score
+    );
+}
+
+// Display messages
+function showMessage(title, description) {
+    const message = document.getElementById("message");
+
+    message.innerHTML = `
+        <h2>${title}</h2>
+        <p>${description}</p>
+    `;
+
+    message.style.display = "flex";
+}
+
+// Initial screen
+resetGame();
+showMessage("Ready to Play?", "Press Start to begin!");
